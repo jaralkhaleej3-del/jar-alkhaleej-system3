@@ -91,9 +91,18 @@
             <div><label>الصنف</label>
                 <select id="i_name">
                     <option value="بانيو كلاسيكي">بانيو كلاسيكي</option>
-                    <option value="بانيو جاكوزي">بانيو جاكوزي</option>
-                    <option value="شاور مربع">شاور مربع</option>
-                    <option value="شاور مستطيل">شاور مستطيل</option>
+                    <option value="بانيو جاكوزي">بانيو جاكوزي </option>
+                    <option value="شاور مربع"> شاور مربع</option>
+                    <option value="شاور مستطيل">شاور مستطيل </option>
+                      <option value="شاور زاوية"> شاور زاوية</option>
+                     <option value="بانيو عادي بجلسة"> بانيو عادي بجلسة</option>
+                    <option value="بانيو عادي بدون جلسة">بانيو عادي بدون جلسة </option>
+                    <option value="بانيو زاوية">بانيو زاوية </option>
+                    <option value="احواض زراعة">احواض زراعة </option>
+                     <option value="حمام متنقل"> حمام متنقل</option>
+                    <option value="صناديق">صناديق</option>
+                    <option value="اعمال خاصة"> اعمال خاصة</option>
+              
                 </select>
             </div>
             <div><label>اللون</label><input type="text" id="i_color"></div>
@@ -110,6 +119,8 @@
                     <option value="أكريليك">أكريليك</option>
                     <option value="فايبر">فايبر</option>
                     <option value="بدون">بدون</option>
+                      <option value="الجوانب الافتراضية للصنف">الجوانب الافتراضية للصنف</option>
+                        <option value="ـــ">ـــ</option>
                 </select>
             </div>
             <div><label>الهرابات</label><input type="number" id="i_drain" value="1"></div>
@@ -117,7 +128,9 @@
         
         <div class="form-row">
             <div><label>اتجاه الهراب</label>
-                <select id="i_drain_dir"><option>يمين</option><option>يسار</option><option>وسط</option></select>
+                <select id="i_drain_dir"><option>يمين</option><option>يسار</option><option>وسط</option>
+                <option>الاتجاه الافتراضي للصنف</option> <option>ــــ</option>
+                </select>
             </div>
             <div><label>الاكسسوارات</label><input type="text" id="i_acc"></div>
         </div>
