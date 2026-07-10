@@ -32,6 +32,7 @@
     </style>
 </head>
 <body>
+    
 <div class="wrapper">
     <div class="card">
         <h2>بيانات العميل والطلب</h2>
@@ -44,7 +45,16 @@
             <div><label>المنسق</label><input type="text" id="v_co_in" oninput="sync()"></div>
         </div>
         <div class="form-row">
-            <div><label>النوع</label><select id="v_ty_in" onchange="sync()"><option>فرد</option><option>مؤسسة</option><option>موزع</option></select></div>
+            <div><label>النوع</label>
+                <select id="v_ty_in" onchange="sync()">
+                <option>فرد</option>
+                <option>مؤسسة</option>
+                <option>شركة</option>
+                  <option>عميل قطاعي</option>
+                    <option>مقاول</option>
+                      
+
+            </select></div>
             <div><label>طريقة الطلب</label><select id="v_me_in" onchange="sync()"><option>اتصال</option><option>زيارة</option></select></div>
         </div>
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
