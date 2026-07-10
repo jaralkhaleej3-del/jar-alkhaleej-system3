@@ -9,71 +9,35 @@
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap');
         :root { --primary: #19352d; --accent: #b68d59; --bg: #f0f2f0; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); padding: 20px; color: #333; }
-        
         .wrapper { max-width: 1500px; margin: auto; display: grid; grid-template-columns: 450px 1fr; gap: 25px; }
         .card { background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-        
         h2 { color: var(--primary); border-right: 4px solid var(--accent); padding-right: 15px; font-size: 18px; margin-bottom: 20px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         label { display: block; font-weight: 700; font-size: 12px; margin-bottom: 5px; color: #555; }
         input, select, textarea { width: 100%; padding: 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; transition: 0.3s; }
         input:focus { border-color: var(--accent); outline: none; }
-        
         .btn-add { background: var(--primary); color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; }
         .btn-save { background: #27ae60; color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .invoice-box { background: #fff; padding: 30px; border: 1px solid #eee; border-radius: 10px; }
         .header-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; font-size: 13px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background: var(--primary); color: #fff; padding: 10px; font-size: 10px; border: 1px solid #fff; }
         td { padding: 8px; border: 1px solid #eee; text-align: center; font-size: 11px; color: #444; }
-        
-       
         .btn-export { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; font-size: 14px; }
-@media print {
-    body * { visibility: hidden; }
-    #printArea, #printArea * { visibility: visible; }
-    #printArea {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        direction: rtl; /* ضمان الاتجاه */
-    }
-}
-@media print {
-    #printArea {
-        font-family: Tahoma, sans-serif !important;
-    }
-}
-#printArea {
-    width: 210mm; /* عرض صفحة A4 */
-    padding: 20px;
-    background: #fff;
-    margin: auto;
-}
-
-/* حل مشكلة تداخل العناصر عند التحويل */
-.invoice-box table {
-    table-layout: fixed; /* إجبار الجدول على عدم التمدد خارج الإطار */
-    width: 100%;
-}
-
-.invoice-box th, .invoice-box td {
-    word-wrap: break-word; /* كسر الكلمات الطويلة */
-    font-size: 10px; /* تصغير الخط قليلاً لضمان احتواء الأعمدة */
-}
-
+        .btn-export:disabled { background: #ccc !important; cursor: not-allowed; }
+        @media print { body * { visibility: hidden; } #printArea, #printArea * { visibility: visible; } #printArea { position: absolute; left: 0; top: 0; width: 100%; direction: rtl; } }
+        #printArea { width: 210mm; padding: 20px; background: #fff; margin: auto; }
+        .invoice-box table { table-layout: fixed; width: 100%; }
+        .invoice-box th, .invoice-box td { word-wrap: break-word; font-size: 10px; }
     </style>
 </head>
 <body>
-
 <div class="wrapper">
     <div class="card">
         <h2>بيانات العميل والطلب</h2>
         <div class="form-row">
             <div><label>اسم العميل</label><input type="text" id="v_name_in" oninput="sync()"></div>
-            <div><label>رقم الطلب</label><input type="text" id="v_ord_in" oninput="sync()"></div>
+            <div><label>رقم الطلب</label><input type="text" id="v_ord_in" oninput="sync()" readonly></div>
         </div>
         <div class="form-row">
             <div><label>الفرع</label><input type="text" id="v_br_in" oninput="sync()"></div>
@@ -83,67 +47,31 @@
             <div><label>النوع</label><select id="v_ty_in" onchange="sync()"><option>فرد</option><option>مؤسسة</option><option>موزع</option></select></div>
             <div><label>طريقة الطلب</label><select id="v_me_in" onchange="sync()"><option>اتصال</option><option>زيارة</option></select></div>
         </div>
-
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
         <h2>مواصفات الصنف التقنية</h2>
-        
         <div class="form-row">
-            <div><label>الصنف</label>
-                <select id="i_name">
-                    <option value="بانيو كلاسيكي">بانيو كلاسيكي</option>
-                    <option value="بانيو جاكوزي">بانيو جاكوزي </option>
-                    <option value="شاور مربع"> شاور مربع</option>
-                    <option value="شاور مستطيل">شاور مستطيل </option>
-                      <option value="شاور زاوية"> شاور زاوية</option>
-                     <option value="بانيو عادي بجلسة"> بانيو عادي بجلسة</option>
-                    <option value="بانيو عادي بدون جلسة">بانيو عادي بدون جلسة </option>
-                    <option value="بانيو زاوية">بانيو زاوية </option>
-                    <option value="احواض زراعة">احواض زراعة </option>
-                     <option value="حمام متنقل"> حمام متنقل</option>
-                    <option value="صناديق">صناديق</option>
-                    <option value="اعمال خاصة"> اعمال خاصة</option>
-              
-                </select>
-            </div>
+            <div><label>الصنف</label><select id="i_name"><option value="بانيو كلاسيكي">بانيو كلاسيكي</option><option value="بانيو جاكوزي">بانيو جاكوزي </option><option value="شاور مربع"> شاور مربع</option><option value="شاور مستطيل">شاور مستطيل </option><option value="شاور زاوية"> شاور زاوية</option><option value="بانيو عادي بجلسة"> بانيو عادي بجلسة</option><option value="بانيو عادي بدون جلسة">بانيو عادي بدون جلسة </option><option value="بانيو زاوية">بانيو زاوية </option><option value="احواض زراعة">احواض زراعة </option><option value="حمام متنقل"> حمام متنقل</option><option value="صناديق">صناديق</option><option value="اعمال خاصة"> اعمال خاصة</option></select></div>
             <div><label>اللون</label><input type="text" id="i_color"></div>
         </div>
-        
         <div class="form-row">
             <div><label>الطول x العرض</label><input type="text" id="i_size"></div>
             <div><label>الكمية</label><input type="number" id="i_qty" value="1"></div>
         </div>
-        
         <div class="form-row">
-            <div><label>نوع الجوانب</label>
-                <select id="i_side">
-                    <option value="أكريليك">أكريليك</option>
-                    <option value="فايبر">فايبر</option>
-                    <option value="بدون">بدون</option>
-                      <option value="الجوانب الافتراضية للصنف">الجوانب الافتراضية للصنف</option>
-                        <option value="ـــ">ـــ</option>
-                </select>
-            </div>
+            <div><label>نوع الجوانب</label><select id="i_side"><option value="أكريليك">أكريليك</option><option value="فايبر">فايبر</option><option value="بدون">بدون</option><option value="الجوانب الافتراضية للصنف">الجوانب الافتراضية للصنف</option><option value="ـــ">ـــ</option></select></div>
             <div><label>الهرابات</label><input type="number" id="i_drain" value="1"></div>
         </div>
-        
         <div class="form-row">
-            <div><label>اتجاه الهراب</label>
-                <select id="i_drain_dir"><option>يمين</option><option>يسار</option><option>وسط</option>
-                <option>الاتجاه الافتراضي للصنف</option> <option>ــــ</option>
-                </select>
-            </div>
+            <div><label>اتجاه الهراب</label><select id="i_drain_dir"><option>يمين</option><option>يسار</option><option>وسط</option><option>الاتجاه الافتراضي للصنف</option><option>ــــ</option></select></div>
             <div><label>الاكسسوارات</label><input type="text" id="i_acc"></div>
         </div>
-
         <div class="form-row">
             <div><label>موعد التسليم</label><input type="date" id="i_del"></div>
             <div><label>نسبة الخصم %</label><input type="number" id="i_disc" value="0"></div>
         </div>
-        
         <div class="form-group"><label>الملاحظات الفنية</label><textarea id="i_notes" rows="2"></textarea></div>
         <button class="btn-add" onclick="addItem()">+ إضافة الصنف لقائمة الإنتاج</button>
     </div>
-
     <div class="card">
         <h2>معاينة المستند الرسمي</h2>
         <div id="printArea" class="invoice-box">
@@ -154,27 +82,21 @@
                 <div>النوع: <span id="v_ty">-</span><br>الطريقة: <span id="v_me">-</span></div>
             </div>
             <table>
-                <thead>
-                    <tr><th>الصنف</th><th>المقاس</th><th>كمية</th><th>جوانب</th><th>هراب</th><th>اتجاه</th><th>خصم</th><th>تسليم</th><th>ملاحظات</th><th>X</th></tr>
-                </thead>
+                <thead><tr><th>الصنف</th><th>المقاس</th><th>كمية</th><th>جوانب</th><th>هراب</th><th>اتجاه</th><th>خصم</th><th>تسليم</th><th>ملاحظات</th><th>X</th></tr></thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
         <div style="display:flex; gap:15px; margin-top:25px;">
-            <button class="btn-export" style="background:var(--accent)" onclick="generatePDF()">تحميل PDF</button>
-            <button class="btn-export" style="background:var(--primary)" onclick="exportPNG()">تصدير PNG</button>
+            <button class="btn-export" id="btnPDF" style="background:var(--accent)" onclick="generatePDF()" disabled>تحميل PDF</button>
+            <button class="btn-export" id="btnPNG" style="background:var(--primary)" onclick="exportPNG()" disabled>تصدير PNG</button>
             <button class="btn-save" onclick="saveToGoogle()">حفظ في قاعدة البيانات</button>
         </div>
+        <button class="btn-save" style="background:#e67e22" onclick="location.reload()">طلب جديد / تحديث الرقم</button>
     </div>
 </div>
-
 <script>
-   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZgabeFNGxNlde8rwmX1iIpnzItKABQUSAoz3_k5igmVVm5FppFeak59zeCaL9819y/exec";
-
-    // جلب رقم الطلب عند فتح الصفحة
-    window.onload = () => {
-        fetch(SCRIPT_URL).then(res => res.text()).then(id => document.getElementById('v_ord_in').value = id);
-    };
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZgabeFNGxNlde8rwmX1iIpnzItKABQUSAoz3_k5igmVVm5FppFeak59zeCaL9819y/exec";
+    window.onload = () => { fetch(SCRIPT_URL + "?action=getmax").then(res => res.text()).then(id => document.getElementById('v_ord_in').value = id); };
     function sync() {
         document.getElementById('v_name').innerText = document.getElementById('v_name_in').value;
         document.getElementById('v_ord').innerText = document.getElementById('v_ord_in').value;
@@ -183,83 +105,17 @@
         document.getElementById('v_ty').innerText = document.getElementById('v_ty_in').value;
         document.getElementById('v_me').innerText = document.getElementById('v_me_in').value;
     }
-
     function addItem() {
-        let row = `<tr>
-            <td>${document.getElementById('i_name').value}</td>
-            <td>${document.getElementById('i_size').value}</td>
-            <td>${document.getElementById('i_qty').value}</td>
-            <td>${document.getElementById('i_side').value}</td>
-            <td>${document.getElementById('i_drain').value}</td>
-            <td>${document.getElementById('i_drain_dir').value}</td>
-            <td>${document.getElementById('i_disc').value}%</td>
-            <td>${document.getElementById('i_del').value}</td>
-            <td>${document.getElementById('i_notes').value}</td>
-            <td><button onclick="this.parentElement.parentElement.remove()" style="color:red; cursor:pointer; background:none; border:none;">X</button></td>
-        </tr>`;
+        let row = `<tr><td>${document.getElementById('i_name').value}</td><td>${document.getElementById('i_size').value}</td><td>${document.getElementById('i_qty').value}</td><td>${document.getElementById('i_side').value}</td><td>${document.getElementById('i_drain').value}</td><td>${document.getElementById('i_drain_dir').value}</td><td>${document.getElementById('i_disc').value}%</td><td>${document.getElementById('i_del').value}</td><td>${document.getElementById('i_notes').value}</td><td><button onclick="this.parentElement.parentElement.remove()" style="color:red; cursor:pointer; background:none; border:none;">X</button></td></tr>`;
         document.getElementById('tableBody').innerHTML += row;
     }
-
-function generatePDF() {
-    // 1. أخذ محتوى منطقة الطباعة وتنسيقاتها
-    const printArea = document.getElementById('printArea').innerHTML;
-    
-    // 2. إنشاء نافذة منبثقة
-    const win = window.open('', '_blank', 'width=800,height=600');
-    
-    // 3. كتابة محتوى الـ HTML داخل النافذة مع تضمين التنسيقات
-    win.document.write(`
-        <html lang="ar" dir="rtl">
-        <head>
-            <title>طباعة الطلب</title>
-            <style>
-                body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; }
-                .invoice-box { border: 1px solid #ccc; padding: 20px; }
-                h2 { text-align: center; color: #19352d; }
-                .header-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f9f9f9; padding: 10px; margin-bottom: 20px; font-size: 14px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                th { background: #19352d; color: #fff; padding: 8px; font-size: 12px; border: 1px solid #ccc; }
-                td { padding: 8px; border: 1px solid #ccc; text-align: center; font-size: 12px; }
-            </style>
-        </head>
-        <body>
-            <div class="invoice-box">
-                ${printArea}
-            </div>
-            <script>
-                // إزالة زر الحذف من الجدول عند الطباعة
-                window.onload = function() {
-                    const removeButtons = document.querySelectorAll('button');
-                    removeButtons.forEach(btn => btn.remove());
-                    window.print();
-                }
-            <\/script>
-        </body>
-        </html>
-    `);
-    
-    win.document.close();
-}
+    function generatePDF() { const printArea = document.getElementById('printArea').innerHTML; const win = window.open('', '_blank', 'width=800,height=600'); win.document.write(`<html lang="ar" dir="rtl"><head><title>طباعة الطلب</title><style>body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; } .invoice-box { border: 1px solid #ccc; padding: 20px; } h2 { text-align: center; color: #19352d; } .header-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f9f9f9; padding: 10px; margin-bottom: 20px; font-size: 14px; } table { width: 100%; border-collapse: collapse; margin-top: 10px; } th { background: #19352d; color: #fff; padding: 8px; font-size: 12px; border: 1px solid #ccc; } td { padding: 8px; border: 1px solid #ccc; text-align: center; font-size: 12px; } </style></head><body><div class="invoice-box">${printArea}</div><script>window.onload = function() { const removeButtons = document.querySelectorAll('button'); removeButtons.forEach(btn => btn.remove()); window.print(); }<\/script></body></html>`); win.document.close(); }
     function exportPNG() { html2canvas(document.getElementById('printArea')).then(c => { let l=document.createElement('a'); l.href=c.toDataURL(); l.download='Order_' + document.getElementById('v_ord_in').value + '.png'; l.click(); }); }
-function saveToGoogle() {
-        const orderData = {
-            order: document.getElementById('v_ord_in').value,
-            name: document.getElementById('v_name_in').value,
-            branch: document.getElementById('v_br_in').value,
-            coordinator: document.getElementById('v_co_in').value,
-            type: document.getElementById('v_ty_in').value,
-            method: document.getElementById('v_me_in').value,
-            items: []
-        };
-        document.querySelectorAll('#tableBody tr').forEach(r => {
-            orderData.items.push({
-                name: r.cells[0].innerText, qty: r.cells[1].innerText,
-                side: r.cells[2].innerText, discount: r.cells[3].innerText,
-                delivery: r.cells[4].innerText
-            });
-        });
+    function saveToGoogle() {
+        const orderData = { order: document.getElementById('v_ord_in').value, name: document.getElementById('v_name_in').value, branch: document.getElementById('v_br_in').value, coordinator: document.getElementById('v_co_in').value, type: document.getElementById('v_ty_in').value, method: document.getElementById('v_me_in').value, items: [] };
+        document.querySelectorAll('#tableBody tr').forEach(r => { orderData.items.push({ name: r.cells[0].innerText, size: r.cells[1].innerText, qty: r.cells[2].innerText, side: r.cells[3].innerText, discount: r.cells[6].innerText, delivery: r.cells[7].innerText }); });
         fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) })
-            .then(() => { alert("تم الحفظ بنجاح!"); location.reload(); });
+            .then(() => { alert("تم الحفظ بنجاح!"); document.getElementById('btnPDF').disabled = false; document.getElementById('btnPNG').disabled = false; });
     }
 </script>
 </body>
