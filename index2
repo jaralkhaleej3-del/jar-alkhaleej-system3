@@ -32,7 +32,6 @@
     </style>
 </head>
 <body>
-    
 <div class="wrapper">
     <div class="card">
         <h2>بيانات العميل والطلب</h2>
@@ -47,14 +46,13 @@
         <div class="form-row">
             <div><label>النوع</label>
                 <select id="v_ty_in" onchange="sync()">
-                <option>فرد</option>
-                <option>مؤسسة</option>
-                <option>شركة</option>
-                  <option>عميل قطاعي</option>
+                    <option>فرد</option>
+                    <option>مؤسسة</option>
+                    <option>شركة</option>
+                    <option>عميل قطاعي</option>
                     <option>مقاول</option>
-                      
-
-            </select></div>
+                </select>
+            </div>
             <div><label>طريقة الطلب</label><select id="v_me_in" onchange="sync()"><option>اتصال</option><option>زيارة</option></select></div>
         </div>
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
@@ -118,6 +116,14 @@
     function addItem() {
         let row = `<tr><td>${document.getElementById('i_name').value}</td><td>${document.getElementById('i_size').value}</td><td>${document.getElementById('i_qty').value}</td><td>${document.getElementById('i_side').value}</td><td>${document.getElementById('i_drain').value}</td><td>${document.getElementById('i_drain_dir').value}</td><td>${document.getElementById('i_disc').value}%</td><td>${document.getElementById('i_del').value}</td><td>${document.getElementById('i_notes').value}</td><td><button onclick="this.parentElement.parentElement.remove()" style="color:red; cursor:pointer; background:none; border:none;">X</button></td></tr>`;
         document.getElementById('tableBody').innerHTML += row;
+        // تصفير حقول الصنف فقط
+        document.getElementById('i_color').value = "";
+        document.getElementById('i_size').value = "";
+        document.getElementById('i_qty').value = "1";
+        document.getElementById('i_drain').value = "1";
+        document.getElementById('i_acc').value = "";
+        document.getElementById('i_disc').value = "0";
+        document.getElementById('i_notes').value = "";
     }
     function generatePDF() { const printArea = document.getElementById('printArea').innerHTML; const win = window.open('', '_blank', 'width=800,height=600'); win.document.write(`<html lang="ar" dir="rtl"><head><title>طباعة الطلب</title><style>body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; } .invoice-box { border: 1px solid #ccc; padding: 20px; } h2 { text-align: center; color: #19352d; } .header-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f9f9f9; padding: 10px; margin-bottom: 20px; font-size: 14px; } table { width: 100%; border-collapse: collapse; margin-top: 10px; } th { background: #19352d; color: #fff; padding: 8px; font-size: 12px; border: 1px solid #ccc; } td { padding: 8px; border: 1px solid #ccc; text-align: center; font-size: 12px; } </style></head><body><div class="invoice-box">${printArea}</div><script>window.onload = function() { const removeButtons = document.querySelectorAll('button'); removeButtons.forEach(btn => btn.remove()); window.print(); }<\/script></body></html>`); win.document.close(); }
     function exportPNG() { html2canvas(document.getElementById('printArea')).then(c => { let l=document.createElement('a'); l.href=c.toDataURL(); l.download='Order_' + document.getElementById('v_ord_in').value + '.png'; l.click(); }); }
