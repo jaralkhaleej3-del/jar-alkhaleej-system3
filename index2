@@ -18,6 +18,7 @@
         input:focus { border-color: var(--accent); outline: none; }
         .btn-add { background: var(--primary); color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; }
         .btn-save { background: #27ae60; color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn-save1 { background: #27ae60; color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .invoice-box { background: #fff; padding: 30px; border: 1px solid #eee; border-radius: 10px; }
         .header-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; font-size: 13px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -90,16 +91,16 @@
                 <div>النوع: <span id="v_ty">-</span><br>الطريقة: <span id="v_me">-</span></div>
             </div>
             <table>
-                <thead><tr><th>الصنف</th><th>المقاس</th><th>كمية</th><th>جوانب</th><th>هراب</th><th>اتجاه</th><th>خصم</th><th>تسليم</th><th>ملاحظات</th><th>X</th></tr></thead>
+                <thead><tr><th>الصنف</th><th>المقاس</th><th>كمية</th><th>جوانب</th><th>اللون</th><th>هراب</th><th>اتجاه</th><th>خصم</th><th>تسليم</th><th>ملاحظات</th><th>X</th></tr></thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
         <div style="display:flex; gap:15px; margin-top:25px;">
             <button class="btn-export" id="btnPDF" style="background:var(--accent)" onclick="generatePDF()" disabled>تحميل PDF</button>
             <button class="btn-export" id="btnPNG" style="background:var(--primary)" onclick="exportPNG()" disabled>تصدير PNG</button>
-            <button class="btn-save" onclick="saveToGoogle()">حفظ في قاعدة البيانات</button>
+            <button class="btn-save" id="btn-save" onclick="saveToGoogle()" >حفظ في قاعدة البيانات</button>
         </div>
-        <button class="btn-save" style="background:#e67e22" onclick="location.reload()">طلب جديد / تحديث الرقم</button>
+        <button class="btn-save1" style="background:#e67e22" onclick="location.reload()">طلب جديد / تحديث الرقم</button>
     </div>
 </div>
 <script>
@@ -114,7 +115,17 @@
         document.getElementById('v_me').innerText = document.getElementById('v_me_in').value;
     }
     function addItem() {
-        let row = `<tr><td>${document.getElementById('i_name').value}</td><td>${document.getElementById('i_size').value}</td><td>${document.getElementById('i_qty').value}</td><td>${document.getElementById('i_side').value}</td><td>${document.getElementById('i_drain').value}</td><td>${document.getElementById('i_drain_dir').value}</td><td>${document.getElementById('i_disc').value}%</td><td>${document.getElementById('i_del').value}</td><td>${document.getElementById('i_notes').value}</td><td><button onclick="this.parentElement.parentElement.remove()" style="color:red; cursor:pointer; background:none; border:none;">X</button></td></tr>`;
+        let row = `<tr><td>${document.getElementById('i_name').value}</td> 
+            <td>${document.getElementById('i_size').value}</td>           
+            <td>${document.getElementById('i_qty').value}</td>           
+            <td>${document.getElementById('i_side').value}</td>
+            <td>${document.getElementById('i_color').value}</td>
+            <td>${document.getElementById('i_drain').value}</td>
+            <td>${document.getElementById('i_drain_dir').value}</td>
+            <td>${document.getElementById('i_disc').value}%</td>
+            <td>${document.getElementById('i_del').value}</td>
+            <td>${document.getElementById('i_notes').value}</td>
+            <td><button onclick="this.parentElement.parentElement.remove()" style="color:red; cursor:pointer; background:none; border:none;">X</button></td></tr>`;
         document.getElementById('tableBody').innerHTML += row;
         // تصفير حقول الصنف فقط
         document.getElementById('i_color').value = "";
@@ -124,6 +135,8 @@
         document.getElementById('i_acc').value = "";
         document.getElementById('i_disc').value = "0";
         document.getElementById('i_notes').value = "";
+        document.getElementById('btn-save').disabled = false; 
+        
     }
     function generatePDF() { const printArea = document.getElementById('printArea').innerHTML; const win = window.open('', '_blank', 'width=800,height=600'); win.document.write(`<html lang="ar" dir="rtl"><head><title>طباعة الطلب</title><style>body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; } .invoice-box { border: 1px solid #ccc; padding: 20px; } h2 { text-align: center; color: #19352d; } .header-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f9f9f9; padding: 10px; margin-bottom: 20px; font-size: 14px; } table { width: 100%; border-collapse: collapse; margin-top: 10px; } th { background: #19352d; color: #fff; padding: 8px; font-size: 12px; border: 1px solid #ccc; } td { padding: 8px; border: 1px solid #ccc; text-align: center; font-size: 12px; } </style></head><body><div class="invoice-box">${printArea}</div><script>window.onload = function() { const removeButtons = document.querySelectorAll('button'); removeButtons.forEach(btn => btn.remove()); window.print(); }<\/script></body></html>`); win.document.close(); }
     function exportPNG() { html2canvas(document.getElementById('printArea')).then(c => { let l=document.createElement('a'); l.href=c.toDataURL(); l.download='Order_' + document.getElementById('v_ord_in').value + '.png'; l.click(); }); }
@@ -131,7 +144,12 @@
         const orderData = { order: document.getElementById('v_ord_in').value, name: document.getElementById('v_name_in').value, branch: document.getElementById('v_br_in').value, coordinator: document.getElementById('v_co_in').value, type: document.getElementById('v_ty_in').value, method: document.getElementById('v_me_in').value, items: [] };
         document.querySelectorAll('#tableBody tr').forEach(r => { orderData.items.push({ name: r.cells[0].innerText, size: r.cells[1].innerText, qty: r.cells[2].innerText, side: r.cells[3].innerText, discount: r.cells[6].innerText, delivery: r.cells[7].innerText }); });
         fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) })
-            .then(() => { alert("تم الحفظ بنجاح!"); document.getElementById('btnPDF').disabled = false; document.getElementById('btnPNG').disabled = false; });
+            .then(() => { alert("تم الحفظ بنجاح!");
+             document.getElementById('btnPDF').disabled = false; 
+             document.getElementById('btnPNG').disabled = false; 
+             document.getElementById('btn-save').disabled = true; 
+            });
+  
     }
 </script>
 </body>
