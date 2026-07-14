@@ -108,7 +108,7 @@
                 <div>النوع: <span id="v_ty">-</span><br>الطريقة: <span id="v_me">-</span></div>
             </div>
             <table>
-                <thead><tr><th>الصنف</th><th>المقاس</th><th>كمية</th><th>جوانب</th><th>اللون</th><th>هراب</th><th>اتجاه</th><th>خصم</th><th>تسليم</th><th>ملاحظات</th><th>X</th></tr></thead>
+                <thead><tr><th>الصنف</th><th>المقاس</th><th>كمية</th><th>جوانب</th><th>اللون</th><th>هراب</th><th>اتجاه</th><th>خصم</th><th>تسليم</th> <th>الاكسسوارات</th> <th>ملاحظات</th><th>X</th></tr></thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
@@ -141,6 +141,7 @@
             <td>${document.getElementById('i_drain_dir').value}</td>
             <td>${document.getElementById('i_disc').value}%</td>
             <td>${document.getElementById('i_del').value}</td>
+             <td>${document.getElementById('i_acc').value}</td>
             <td>${document.getElementById('i_notes').value}</td>
             <td><button onclick="this.parentElement.parentElement.remove()" style="color:red; cursor:pointer; background:none; border:none;">X</button></td></tr>`;
         document.getElementById('tableBody').innerHTML += row;
@@ -152,6 +153,7 @@
         document.getElementById('i_acc').value = "";
         document.getElementById('i_disc').value = "0";
         document.getElementById('i_notes').value = "";
+        document.getElementById('i_acc').value = "";
         document.getElementById('btn-save').disabled = false; 
         
     }
