@@ -30,6 +30,21 @@
         #printArea { width: 210mm; padding: 20px; background: #fff; margin: auto; }
         .invoice-box table { table-layout: fixed; width: 100%; }
         .invoice-box th, .invoice-box td { word-wrap: break-word; font-size: 10px; }
+    .btn-refresh {
+    background: #e67e22; /* لون برتقالي مميز للهوية */
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+    margin-right: 10px;
+    transition: 0.3s;
+}
+.btn-refresh:hover {
+    background: #d35400;
+}
     </style>
 </head>
 <body>
@@ -39,6 +54,8 @@
         <div class="form-row">
             <div><label>اسم العميل</label><input type="text" id="v_name_in" oninput="sync()"></div>
             <div><label>رقم الطلب</label><input type="text" id="v_ord_in" oninput="sync()" readonly></div>
+            <label>رقم الطلب</label>
+    <button type="button" class="btn-refresh" onclick="refreshOrderID()">تحديث الرقم</button>
         </div>
         <div class="form-row">
             <div><label>الفرع</label><input type="text" id="v_br_in" oninput="sync()"></div>
@@ -79,7 +96,7 @@
             <div><label>نسبة الخصم %</label><input type="number" id="i_disc" value="0"></div>
         </div>
         <div class="form-group"><label>الملاحظات الفنية</label><textarea id="i_notes" rows="2"></textarea></div>
-        <button class="btn-add" onclick="addItem()">+ إضافة الصنف لقائمة الإنتاج</button>
+        <button class="btn-add" onclick="addItem();refreshOrderID();">+ إضافة الصنف لقائمة الإنتاج</button>
     </div>
     <div class="card">
         <h2>معاينة المستند الرسمي</h2>
@@ -98,9 +115,9 @@
         <div style="display:flex; gap:15px; margin-top:25px;">
             <button class="btn-export" id="btnPDF" style="background:var(--accent)" onclick="generatePDF()" disabled>تحميل PDF</button>
             <button class="btn-export" id="btnPNG" style="background:var(--primary)" onclick="exportPNG()" disabled>تصدير PNG</button>
-            <button class="btn-save" id="btn-save" onclick="saveToGoogle()" >حفظ في قاعدة البيانات</button>
+            <button class="btn-save" id="btn-save" onclick="saveToGoogle() ; refreshOrderID();" >حفظ في قاعدة البيانات</button>
         </div>
-        <button class="btn-save1" style="background:#e67e22" onclick="location.reload()">طلب جديد / تحديث الرقم</button>
+        <button class="btn-save1" style="background:#e67e22" onclick="location.reload() ;refreshOrderID();" >طلب جديد / تحديث الرقم</button>
     </div>
 </div>
 <script>
@@ -140,17 +157,63 @@
     }
     function generatePDF() { const printArea = document.getElementById('printArea').innerHTML; const win = window.open('', '_blank', 'width=800,height=600'); win.document.write(`<html lang="ar" dir="rtl"><head><title>طباعة الطلب</title><style>body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; } .invoice-box { border: 1px solid #ccc; padding: 20px; } h2 { text-align: center; color: #19352d; } .header-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f9f9f9; padding: 10px; margin-bottom: 20px; font-size: 14px; } table { width: 100%; border-collapse: collapse; margin-top: 10px; } th { background: #19352d; color: #fff; padding: 8px; font-size: 12px; border: 1px solid #ccc; } td { padding: 8px; border: 1px solid #ccc; text-align: center; font-size: 12px; } </style></head><body><div class="invoice-box">${printArea}</div><script>window.onload = function() { const removeButtons = document.querySelectorAll('button'); removeButtons.forEach(btn => btn.remove()); window.print(); }<\/script></body></html>`); win.document.close(); }
     function exportPNG() { html2canvas(document.getElementById('printArea')).then(c => { let l=document.createElement('a'); l.href=c.toDataURL(); l.download='Order_' + document.getElementById('v_ord_in').value + '.png'; l.click(); }); }
+
+function refreshOrderID() {
+    const btn = event.target;
+    btn.innerText = "جاري...";
+    btn.disabled = true;
+
+    fetch(SCRIPT_URL + "?action=getmax") 
+    .then(res => res.text())
+    .then(newID => {
+        document.getElementById('v_ord_in').value = newID;
+        document.getElementById('v_ord').innerText = newID; 
+        btn.innerText = "تحديث الرقم";
+        btn.disabled = false;
+    })
+    .catch(() => {
+        btn.innerText = "خطأ!";
+        btn.disabled = false;
+    });
+}
+
+    // --- استبدل دالة saveToGoogle بهذه فقط ---
+
     function saveToGoogle() {
-        const orderData = { order: document.getElementById('v_ord_in').value, name: document.getElementById('v_name_in').value, branch: document.getElementById('v_br_in').value, coordinator: document.getElementById('v_co_in').value, type: document.getElementById('v_ty_in').value, method: document.getElementById('v_me_in').value, items: [] };
-        document.querySelectorAll('#tableBody tr').forEach(r => { orderData.items.push({ name: r.cells[0].innerText, size: r.cells[1].innerText, qty: r.cells[2].innerText, side: r.cells[3].innerText, discount: r.cells[6].innerText, delivery: r.cells[7].innerText }); });
-        fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) })
-            .then(() => { alert("تم الحفظ بنجاح!");
-             document.getElementById('btnPDF').disabled = false; 
-             document.getElementById('btnPNG').disabled = false; 
-             document.getElementById('btn-save').disabled = true; 
-            });
-  
-    }
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true; // تعطيل الزر فوراً لمنع التكرار
+  btn.innerText = "جاري الحفظ...";
+
+  // جلب أحدث رقم قبل الحفظ مباشرة لضمان الدقة
+  fetch(SCRIPT_URL + "?action=getmax").then(res => res.text()).then(newID => {
+    
+    const orderData = { 
+      order: newID, // استخدام الرقم الجديد المضمون
+      name: document.getElementById('v_name_in').value, 
+      branch: document.getElementById('v_br_in').value, 
+      coordinator: document.getElementById('v_co_in').value, 
+      type: document.getElementById('v_ty_in').value, 
+      method: document.getElementById('v_me_in').value, 
+      items: [] 
+    };
+    
+    document.querySelectorAll('#tableBody tr').forEach(r => { 
+      orderData.items.push({ 
+        name: r.cells[0].innerText, size: r.cells[1].innerText, qty: r.cells[2].innerText, 
+        side: r.cells[3].innerText, discount: r.cells[7].innerText, delivery: r.cells[8].innerText 
+      }); 
+    });
+
+    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) })
+      .then(() => { 
+        alert("تم الحفظ بنجاح برقم: " + newID);
+        document.getElementById('v_ord_in').value = newID; // تحديث الحقل
+        document.getElementById('btnPDF').disabled = false; 
+        document.getElementById('btnPNG').disabled = false; 
+        btn.innerText = "حفظ في قاعدة البيانات";
+      });
+  });
+}
 </script>
 </body>
 </html>
