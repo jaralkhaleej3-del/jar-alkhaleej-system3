@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#002D62"> <!-- اللون الكحلي الخاص بكم -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' https://script.google.com https://script.googleusercontent.com;">
     <meta charset="UTF-8">
     <title>نظام إدارة الإنتاج - شركة جار الخليج</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -73,10 +78,13 @@
             </div>
             <div><label>طريقة الطلب</label><select id="v_me_in" onchange="sync()"><option>اتصال</option><option>زيارة</option></select></div>
         </div>
+        <div class="form-row">
+    <div><label><input type="checkbox" id="v_maint_check" onchange="sync()"> طلب صيانة</label></div>
+</div>
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
         <h2>مواصفات الصنف التقنية</h2>
         <div class="form-row">
-            <div><label>الصنف</label><select id="i_name"><option value="بانيو كلاسيكي">بانيو كلاسيكي</option><option value="بانيو جاكوزي">بانيو جاكوزي </option><option value="شاور مربع"> شاور مربع</option><option value="شاور مستطيل">شاور مستطيل </option><option value="شاور زاوية"> شاور زاوية</option><option value="بانيو عادي بجلسة"> بانيو عادي بجلسة</option><option value="بانيو عادي بدون جلسة">بانيو عادي بدون جلسة </option><option value="بانيو زاوية">بانيو زاوية </option><option value="احواض زراعة">احواض زراعة </option><option value="حمام متنقل"> حمام متنقل</option><option value="صناديق">صناديق</option><option value="اعمال خاصة"> اعمال خاصة</option></select></div>
+            <div><label>الصنف</label><select id="i_name"><option value="بانيو كلاسيكي">بانيو كلاسيكي</option><option value="بانيو جاكوزي">بانيو جاكوزي </option><option value="شاور مربع"> شاور مربع</option><option value="شاور مستطيل">شاور مستطيل </option><option value="شاور زاوية"> شاور زاوية</option><option value="بانيو  بجلسة"> بانيو  بجلسة</option><option value="بانيو عادي  ">بانيو عادي   </option><option value="بانيو زاوية">بانيو زاوية </option><option value="احواض زراعة">احواض زراعة </option><option value="حمام متنقل"> حمام متنقل</option><option value="صناديق">صناديق</option><option value="اعمال خاصة"> اعمال خاصة</option></select></div>
             <div><label>اللون</label><input type="text" id="i_color"></div>
         </div>
         <div class="form-row">
@@ -106,6 +114,7 @@
                 <div>العميل: <span id="v_name">-</span><br>رقم الطلب: <span id="v_ord">-</span></div>
                 <div>الفرع: <span id="v_br">-</span><br>المنسق: <span id="v_co">-</span></div>
                 <div>النوع: <span id="v_ty">-</span><br>الطريقة: <span id="v_me">-</span></div>
+                <div id="v_maint_text" style="text-align: left; font-weight: bold; color: red; display: none;">صيانة</div>
             </div>
             <table>
                 <thead><tr><th>الصنف</th><th>المقاس</th><th>كمية</th><th>جوانب</th><th>اللون</th><th>هراب</th><th>اتجاه</th><th>خصم</th><th>تسليم</th> <th>الاكسسوارات</th> <th>ملاحظات</th><th>X</th></tr></thead>
@@ -130,6 +139,7 @@
         document.getElementById('v_co').innerText = document.getElementById('v_co_in').value;
         document.getElementById('v_ty').innerText = document.getElementById('v_ty_in').value;
         document.getElementById('v_me').innerText = document.getElementById('v_me_in').value;
+        document.getElementById('v_maint_text').style.display = document.getElementById('v_maint_check').checked ? 'block' : 'none';
     }
     function addItem() {
         let row = `<tr><td>${document.getElementById('i_name').value}</td> 
@@ -181,35 +191,46 @@ function refreshOrderID() {
 
     // --- استبدل دالة saveToGoogle بهذه فقط ---
 
-    function saveToGoogle() {
+function saveToGoogle() {
   const btn = document.getElementById('btn-save');
-  btn.disabled = true; // تعطيل الزر فوراً لمنع التكرار
+  btn.disabled = true;
   btn.innerText = "جاري الحفظ...";
 
-  // جلب أحدث رقم قبل الحفظ مباشرة لضمان الدقة
   fetch(SCRIPT_URL + "?action=getmax").then(res => res.text()).then(newID => {
     
     const orderData = { 
-      order: newID, // استخدام الرقم الجديد المضمون
+      order: newID,
       name: document.getElementById('v_name_in').value, 
       branch: document.getElementById('v_br_in').value, 
       coordinator: document.getElementById('v_co_in').value, 
       type: document.getElementById('v_ty_in').value, 
-      method: document.getElementById('v_me_in').value, 
+      method: document.getElementById('v_me_in').value,
+
+      // إضافة حالة الصيانة هنا
+      maintenance: document.getElementById('v_maint_check').checked ? "نعم" : "لا",
       items: [] 
     };
     
-    document.querySelectorAll('#tableBody tr').forEach(r => { 
-      orderData.items.push({ 
-        name: r.cells[0].innerText, size: r.cells[1].innerText, qty: r.cells[2].innerText, 
-        side: r.cells[3].innerText, discount: r.cells[7].innerText, delivery: r.cells[8].innerText 
-      }); 
-    });
+  document.querySelectorAll('#tableBody tr').forEach(r => { 
+    orderData.items.push({ 
+        name: r.cells[0].innerText, 
+        size: r.cells[1].innerText, 
+        qty: r.cells[2].innerText, 
+        gnb: r.cells[3].innerText, 
+        clor: r.cells[4].innerText, 
+        hrbq: r.cells[5].innerText, 
+        side: r.cells[6].innerText,      // أضيفت فاصلة هنا
+        discnt: r.cells[7].innerText,    // أضيفت فاصلة هنا
+        delivery: r.cells[8].innerText,  // أضيفت فاصلة هنا
+        acses: r.cells[9].innerText,     // أضيفت فاصلة هنا
+        note: r.cells[10].innerText      // لا تحتاج فاصلة لأنها الأخيرة
+    }); 
+});
 
     fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) })
       .then(() => { 
         alert("تم الحفظ بنجاح برقم: " + newID);
-        document.getElementById('v_ord_in').value = newID; // تحديث الحقل
+        document.getElementById('v_ord_in').value = newID;
         document.getElementById('btnPDF').disabled = false; 
         document.getElementById('btnPNG').disabled = false; 
         btn.innerText = "حفظ في قاعدة البيانات";
