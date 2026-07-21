@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#002D62">
@@ -13,74 +14,89 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap');
         :root { --primary: #19352d; --accent: #b68d59; --bg: #f0f2f0; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); padding: 20px; color: #333; }
+        
+        * { box-sizing: border-box; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); padding: 20px; color: #333; margin: 0; }
+        
         .wrapper { max-width: 1500px; margin: auto; display: grid; grid-template-columns: 450px 1fr; gap: 25px; }
         .card { background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-        h2 { color: var(--primary); border-right: 4px solid var(--accent); padding-right: 15px; font-size: 18px; margin-bottom: 20px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        label { display: block; font-weight: 700; font-size: 12px; margin-bottom: 5px; color: #555; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; transition: 0.3s; }
-        input:focus { border-color: var(--accent); outline: none; }
+        h2 { color: var(--primary); border-right: 4px solid var(--accent); padding-right: 15px; font-size: 18px; margin-bottom: 20px; margin-top: 0; }
         
-        /* تنسيق خاص لحقل القراءة فقط لتمييزه بأنه غير قابل للتعديل */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; align-items: end; }
+        label { display: block; font-weight: 700; font-size: 12px; margin-bottom: 5px; color: #555; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; transition: 0.3s; font-family: 'Cairo', sans-serif; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
+        
         textarea[readonly] { background-color: #f9f9f9; color: #666; cursor: not-allowed; }
 
-        .btn-add { background: var(--primary); color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; }
-        .btn-save { background: #27ae60; color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .btn-save1 { background: #27ae60; color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn-add { background: var(--primary); color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.3s; }
+        .btn-add:hover { background: #11241e; }
+        
+        .btn-save { background: #27ae60; color: #fff; flex: 1; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .btn-save:hover { background: #219150; }
+        .btn-save:disabled { background: #ccc !important; cursor: not-allowed; }
+        
+        .btn-new { background: #e67e22; color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 15px; transition: 0.3s; }
+        .btn-new:hover { background: #d35400; }
+        
         .invoice-box { background: #fff; padding: 30px; border: 1px solid #eee; border-radius: 10px; }
         .header-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; font-size: 13px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
+        
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: var(--primary); color: #fff; padding: 10px; font-size: 10px; border: 1px solid #fff; }
+        th { background: var(--primary); color: #fff; padding: 10px; font-size: 11px; border: 1px solid #fff; }
         td { padding: 8px; border: 1px solid #eee; text-align: center; font-size: 11px; color: #444; }
-        .btn-export { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; font-size: 14px; }
+        
+        .btn-export { flex: 1; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; font-size: 14px; transition: 0.3s; }
         .btn-export:disabled { background: #ccc !important; cursor: not-allowed; }
         
-        /* تنسيق تذييل الفاتورة داخل المستند */
         .invoice-footer { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc; font-size: 11px; color: #555; }
         .invoice-footer-notes { white-space: pre-wrap; margin-bottom: 10px; line-height: 1.6; }
         .invoice-timestamp { font-weight: bold; color: var(--primary); font-size: 10px; text-align: left; }
+
+        .btn-refresh {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: 0.3s;
+            width: 100%;
+        }
+        .btn-refresh:hover { background: #d35400; }
+
+        @media (max-width: 992px) {
+            .wrapper { grid-template-columns: 1fr; }
+        }
 
         @media print { 
             body * { visibility: hidden; } 
             #printArea, #printArea * { visibility: visible; } 
             #printArea { position: absolute; left: 0; top: 0; width: 100%; direction: rtl; } 
+            .no-print { display: none !important; }
         }
-        #printArea { width: 210mm; padding: 20px; background: #fff; margin: auto; }
-        .invoice-box table { table-layout: fixed; width: 100%; }
-        .invoice-box th, .invoice-box td { word-wrap: break-word; font-size: 10px; }
-        
-        .btn-refresh {
-            background: #e67e22;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: bold;
-            margin-right: 10px;
-            transition: 0.3s;
-        }
-        .btn-refresh:hover { background: #d35400; }
+        .invoice-box { width: 100%; max-width: 210mm; padding: 20px; background: #fff; margin: auto; }
     </style>
 </head>
 <body>
+
 <div class="wrapper">
+    <!-- كرت الإدخال -->
     <div class="card">
         <h2>بيانات العميل والطلب</h2>
         <div class="form-row">
-            <div><label>اسم العميل</label><input type="text" id="v_name_in" oninput="sync()"></div>
-            <div><label>رقم الطلب</label><input type="text" id="v_ord_in" oninput="sync()" readonly></div>
-            <label>رقم الطلب</label>
-            <button type="button" class="btn-refresh" onclick="refreshOrderID()">تحديث الرقم</button>
+            <div><label>اسم العميل</label><input type="text" id="v_name_in" oninput="sync()" placeholder="أدخل اسم العميل"></div>
+            <div><label>رقم الطلب</label><input type="text" id="v_ord_in" oninput="sync()" readonly placeholder="جاري التحميل..."></div>
         </div>
         <div class="form-row">
             <div><label>الفرع</label><input type="text" id="v_br_in" oninput="sync()"></div>
             <div><label>المنسق</label><input type="text" id="v_co_in" oninput="sync()"></div>
         </div>
         <div class="form-row">
-            <div><label>النوع</label>
+            <div>
+                <label>النوع</label>
                 <select id="v_ty_in" onchange="sync()">
                     <option>فرد</option>
                     <option>مؤسسة</option>
@@ -89,97 +105,190 @@
                     <option>مقاول</option>
                 </select>
             </div>
-            <div><label>طريقة الطلب</label><select id="v_me_in" onchange="sync()"><option>اتصال</option><option>زيارة</option></select></div>
+            <div>
+                <label>طريقة الطلب</label>
+                <select id="v_me_in" onchange="sync()">
+                    <option>اتصال</option>
+                    <option>زيارة</option>
+                </select>
+            </div>
         </div>
         <div class="form-row">
             <div><label><input type="checkbox" id="v_maint_check" onchange="sync()"> طلب صيانة</label></div>
+            <div><button type="button" id="btn-refresh-id" class="btn-refresh" onclick="refreshOrderID(event)">🔄 تحديث رقم الطلب</button></div>
         </div>
         
-        <!-- تمت إضافة خاصية readonly هنا لجعل المربع غير قابل للكتابة -->
         <div class="form-group" style="margin-top: 15px;">
             <label>شروط الاستبدال والإرجاع / تذييل الفاتورة (معتمدة)</label>
-            <textarea id="v_footer_in" rows="3" readonly> 1. .يعتبر الطلب معتمدا بعد ساعة من وقت اصدار الطلب مالم يتم المراجعة خلال الساعة
-2. الالوان والأكسسوارات غير قابلة للارجاع والاستبدال مالم يكن هناك خلل او عيب مصنعي.
+            <textarea id="v_footer_in" rows="3" readonly>1. يعتبر الطلب معتمداً بعد ساعة من وقت إصداره ما لم يتم المراجعة خلال الساعة.
+2. الألوان والأكسسوارات غير قابلة للإرجاع والاستبدال ما لم يكن هناك خلل أو عيب مصنعي.
 3. بمجرد استلام المنتج، يقر العميل بأنه تم فحص المنتج واستلامه بحالة سليمة ومطابقة للمواصفات.
-4. عند الارجاع والاستبدال تطبق سياسة الارجاع والاستبدال.
-* تطبق الاحكام والشروط 
-
-            </textarea> 
+4. عند الإرجاع والاستبدال تطبق سياسة الإرجاع والاستبدال.
+* تطبق الأحكام والشروط</textarea> 
         </div>
 
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
         <h2>مواصفات الصنف التقنية</h2>
         <div class="form-row">
-            <div><label>الصنف</label><select id="i_name"><option value="بانيو كلاسيكي">بانيو كلاسيكي</option><option value="بانيو جاكوزي">بانيو جاكوزي </option><option value="شاور مربع"> شاور مربع</option><option value="شاور مستطيل">شاور مستطيل </option><option value="شاور زاوية"> شاور زاوية</option><option value="بانيو جلسة"> بانيو جلسة</option><option value="بانيو عادي">بانيو عادي </option><option value="بانيو زاوية">بانيو زاوية </option><option value="احواض زراعة">احواض زراعة </option><option value="حمام متنقل"> حمام متنقل</option><option value="صناديق">صناديق</option><option value="اعمال خاصة"> اعمال خاصة</option></select></div>
+            <div>
+                <label>الصنف</label>
+                <select id="i_name">
+                    <option value="بانيو كلاسيكي">بانيو كلاسيكي</option>
+                    <option value="بانيو جاكوزي">بانيو جاكوزي</option>
+                    <option value="شاور مربع">شاور مربع</option>
+                    <option value="شاور مستطيل">شاور مستطيل</option>
+                    <option value="شاور زاوية">شاور زاوية</option>
+                    <option value="بانيو جلسة">بانيو جلسة</option>
+                    <option value="بانيو عادي">بانيو عادي</option>
+                    <option value="بانيو زاوية">بانيو زاوية</option>
+                    <option value="أحواض زراعة">أحواض زراعة</option>
+                    <option value="حمام متنقل">حمام متنقل</option>
+                    <option value="صناديق">صناديق</option>
+                    <option value="أعمال خاصة">أعمال خاصة</option>
+                </select>
+            </div>
             <div><label>اللون</label><input type="text" id="i_color"></div>
         </div>
         <div class="form-row">
-            <div><label>الطول x العرض</label><input type="text" id="i_size"></div>
-            <div><label>الكمية</label><input type="number" id="i_qty" value="1"></div>
+            <div><label>الطول x العرض</label><input type="text" id="i_size" placeholder="مثال: 120x80"></div>
+            <div><label>الكمية</label><input type="number" id="i_qty" value="1" min="1"></div>
         </div>
         <div class="form-row">
-            <div><label>نوع الجوانب</label><select id="i_side"><option value="أكريليك">أكريليك</option><option value="فايبر">فايبر</option><option value="بدون">بدون</option><option value="الجوانب الافتراضية للصنف">الجوانب الافتراضية للصنف</option><option value="ـــ">ـــ</option></select></div>
-            <div><label>الهرابات</label><input type="number" id="i_drain" value="1"></div>
+            <div>
+                <label>نوع الجوانب</label>
+                <select id="i_side">
+                    <option value="أكريليك">أكريليك</option>
+                    <option value="فايبر">فايبر</option>
+                    <option value="بدون">بدون</option>
+                    <option value="الجوانب الافتراضية للصنف">الجوانب الافتراضية للصنف</option>
+                    <option value="ـــ">ـــ</option>
+                </select>
+            </div>
+            <div><label>الهرابات</label><input type="number" id="i_drain" value="1" min="0"></div>
         </div>
         <div class="form-row">
-            <div><label>اتجاه الهراب</label><select id="i_drain_dir"><option>يمين</option><option>يسار</option><option>وسط</option><option>الاتجاه الافتراضي للصنف</option><option>ــــ</option></select></div>
+            <div>
+                <label>اتجاه الهراب</label>
+                <select id="i_drain_dir">
+                    <option>يمين</option>
+                    <option>يسار</option>
+                    <option>وسط</option>
+                    <option>الاتجاه الافتراضي للصنف</option>
+                    <option>ــــ</option>
+                </select>
+            </div>
             <div><label>الاكسسوارات</label><input type="text" id="i_acc"></div>
         </div>
         <div class="form-row">
             <div><label>موعد التسليم</label><input type="date" id="i_del"></div>
-            <div><label>نسبة الخصم %</label><input type="number" id="i_disc" value="0"></div>
+            <div><label>نسبة الخصم %</label><input type="number" id="i_disc" value="0" min="0" max="100"></div>
         </div>
-        <div class="form-group"><label>الملاحظات الفنية</label><textarea id="i_notes" rows="2"></textarea></div>
-        <button class="btn-add" onclick="addItem();refreshOrderID();">+ إضافة الصنف لقائمة الإنتاج</button>
+        <div class="form-group" style="margin-bottom:15px;">
+            <label>الملاحظات الفنية</label>
+            <textarea id="i_notes" rows="2"></textarea>
+        </div>
+        
+        <button type="button" class="btn-add" onclick="addItem()">+ إضافة الصنف لقائمة الإنتاج</button>
     </div>
     
+    <!-- كرت المعاينة والطباعة -->
     <div class="card">
         <h2>معاينة المستند الرسمي</h2>
         <div id="printArea" class="invoice-box">
-            <h2 style="text-align:center; color: var(--primary);">شركة جار الخليج للصناعة</h2>
+            <h2 style="text-align:center; color: var(--primary); border:none;">شركة جار الخليج للصناعة</h2>
             <div class="header-meta">
                 <div>العميل: <span id="v_name">-</span><br>رقم الطلب: <span id="v_ord">-</span></div>
                 <div>الفرع: <span id="v_br">-</span><br>المنسق: <span id="v_co">-</span></div>
                 <div>النوع: <span id="v_ty">-</span><br>الطريقة: <span id="v_me">-</span></div>
-                <div id="v_maint_text" style="text-align: left; font-weight: bold; color: red; display: none;">صيانة</div>
+                <div id="v_maint_text" style="text-align: left; font-weight: bold; color: red; display: none; grid-column: span 3;">⚠️ طلب صيانة</div>
             </div>
             <table>
-                <thead><tr><th>الصنف</th><th>المقاس</th><th>كمية</th><th>جوانب</th><th>اللون</th><th>هراب</th><th>اتجاه</th><th>خصم</th><th>تسليم</th> <th>الاكسسوارات</th> <th>ملاحظات</th><th>X</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>الصنف</th>
+                        <th>المقاس</th>
+                        <th>كمية</th>
+                        <th>جوانب</th>
+                        <th>اللون</th>
+                        <th>هراب</th>
+                        <th>اتجاه</th>
+                        <th>خصم</th>
+                        <th>تسليم</th>
+                        <th>الاكسسوارات</th>
+                        <th>ملاحظات</th>
+                        <th class="no-print">حذف</th>
+                    </tr>
+                </thead>
                 <tbody id="tableBody"></tbody>
             </table>
             
-            <!-- تذييل الفاتورة -->
             <div class="invoice-footer">
-                <div id="v_footer_display" class="invoice-footer-notes">
-
-                <div id="v_timestamp_display" class="invoice-timestamp">تاريخ الاصدار: -</div>
+                <div id="v_footer_display" class="invoice-footer-notes"></div>
+                <div id="v_timestamp_display" class="invoice-timestamp">تاريخ الإصدار: -</div>
             </div>
         </div>
         
         <div style="display:flex; gap:15px; margin-top:25px;">
-            <button class="btn-export" id="btnPDF" style="background:var(--accent)" onclick="generatePDF()" disabled>تحميل PDF</button>
-            <button class="btn-export" id="btnPNG" style="background:var(--primary)" onclick="exportPNG()" disabled>تصدير PNG</button>
-            <button class="btn-save" id="btn-save" onclick="saveToGoogle(); refreshOrderID();">حفظ في قاعدة البيانات</button>
+            <button type="button" class="btn-save" id="btn-save" onclick="saveToGoogle()" disabled>💾 حفظ في قاعدة البيانات</button>
+            <button type="button" class="btn-export" id="btnPDF" style="background:var(--accent)" onclick="generatePDF()" disabled>📄 تحميل PDF</button>
+            <button type="button" class="btn-export" id="btnPNG" style="background:var(--primary)" onclick="exportPNG()" disabled>🖼️ تصدير PNG</button>
         </div>
-        <button class="btn-save1" style="background:#e67e22" onclick="location.reload(); refreshOrderID();">طلب جديد / تحديث الرقم</button>
+        <button type="button" class="btn-new" onclick="startNewOrder()">➕ طلب جديد / إعادة تنشيط</button>
     </div>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZgabeFNGxNlde8rwmX1iIpnzItKABQUSAoz3_k5igmVVm5FppFeak59zeCaL9819y/exec";
-    
+    let isSaved = false;
+
     window.onload = () => { 
-        fetch(SCRIPT_URL + "?action=getmax").then(res => res.text()).then(id => document.getElementById('v_ord_in').value = id); 
+        fetchOrderID();
         syncFooter(); 
+        sync();
     };
 
+    function fetchOrderID() {
+        const ordInput = document.getElementById('v_ord_in');
+        ordInput.value = "جاري التحميل...";
+
+        let safetyTimer = setTimeout(() => {
+            if (ordInput.value === "جاري التحميل...") {
+                ordInput.value = "";
+                ordInput.removeAttribute('readonly');
+                ordInput.placeholder = "أدخل رقم الطلب يدوياً";
+                document.getElementById('v_ord').innerText = "-";
+            }
+        }, 4000);
+
+        fetch(SCRIPT_URL + "?action=getmax")
+            .then(res => res.text())
+            .then(id => {
+                clearTimeout(safetyTimer);
+                if (id && !id.includes("Error") && !id.includes("OK")) {
+                    ordInput.value = id.trim();
+                    document.getElementById('v_ord').innerText = id.trim();
+                } else {
+                    ordInput.value = "";
+                    ordInput.removeAttribute('readonly');
+                    ordInput.placeholder = "أدخل رقم الطلب يدوياً";
+                }
+                ordInput.setAttribute('readonly', true);
+            })
+            .catch(() => {
+                clearTimeout(safetyTimer);
+                ordInput.value = "";
+                ordInput.removeAttribute('readonly');
+                ordInput.placeholder = "أدخل رقم الطلب يدوياً";
+            });
+    }
+
     function sync() {
-        document.getElementById('v_name').innerText = document.getElementById('v_name_in').value;
-        document.getElementById('v_ord').innerText = document.getElementById('v_ord_in').value;
-        document.getElementById('v_br').innerText = document.getElementById('v_br_in').value;
-        document.getElementById('v_co').innerText = document.getElementById('v_co_in').value;
-        document.getElementById('v_ty').innerText = document.getElementById('v_ty_in').value;
-        document.getElementById('v_me').innerText = document.getElementById('v_me_in').value;
+        document.getElementById('v_name').innerText = document.getElementById('v_name_in').value || '-';
+        document.getElementById('v_ord').innerText = document.getElementById('v_ord_in').value || '-';
+        document.getElementById('v_br').innerText = document.getElementById('v_br_in').value || '-';
+        document.getElementById('v_co').innerText = document.getElementById('v_co_in').value || '-';
+        document.getElementById('v_ty').innerText = document.getElementById('v_ty_in').value || '-';
+        document.getElementById('v_me').innerText = document.getElementById('v_me_in').value || '-';
         document.getElementById('v_maint_text').style.display = document.getElementById('v_maint_check').checked ? 'block' : 'none';
     }
 
@@ -189,32 +298,41 @@
 
     function updateTimestamp() {
         const now = new Date();
-        const optionsDate = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-        const optionsDay = { weekday: 'long' };
-
-        const dateStr = now.toLocaleDateString('ar-SA', optionsDate);
-        const timeStr = now.toLocaleTimeString('ar-SA', optionsTime);
-        const dayStr = now.toLocaleDateString('ar-SA', optionsDay);
-
+        const dateStr = now.toLocaleDateString('ar-SA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const timeStr = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        const dayStr = now.toLocaleDateString('ar-SA', { weekday: 'long' });
         const fullTimestamp = `يوم الإصدار: ${dayStr} | التاريخ: ${dateStr} | الساعة: ${timeStr}`;
         document.getElementById('v_timestamp_display').innerText = fullTimestamp;
         return fullTimestamp;
     }
 
     function addItem() {
-        let row = `<tr><td>${document.getElementById('i_name').value}</td> 
-            <td>${document.getElementById('i_size').value}</td>          
+        if (isSaved) {
+            alert("⚠️ تم حفظ الطلب مسبقاً. اضغط على 'إنشاء طلب جديد'.");
+            return;
+        }
+
+        const size = document.getElementById('i_size').value.trim();
+        if (!size) {
+            alert("يرجى إدخال المقاس قبل الإضافة.");
+            return;
+        }
+
+        let row = `<tr>
+            <td>${document.getElementById('i_name').value}</td> 
+            <td>${size}</td>          
             <td>${document.getElementById('i_qty').value}</td>          
             <td>${document.getElementById('i_side').value}</td>
-            <td>${document.getElementById('i_color').value}</td>
+            <td>${document.getElementById('i_color').value || 'افتراضي'}</td>
             <td>${document.getElementById('i_drain').value}</td>
             <td>${document.getElementById('i_drain_dir').value}</td>
             <td>${document.getElementById('i_disc').value}%</td>
-            <td>${document.getElementById('i_del').value}</td>
-             <td>${document.getElementById('i_acc').value}</td>
-            <td>${document.getElementById('i_notes').value}</td>
-            <td><button onclick="this.parentElement.parentElement.remove()" style="color:red; cursor:pointer; background:none; border:none;">X</button></td></tr>`;
+            <td>${document.getElementById('i_del').value || '-'}</td>
+            <td>${document.getElementById('i_acc').value || '-'}</td>
+            <td>${document.getElementById('i_notes').value || '-'}</td>
+            <td class="no-print"><button type="button" onclick="removeRow(this)" style="color:red; cursor:pointer; background:none; border:none; font-weight:bold;">✕</button></td>
+        </tr>`;
+        
         document.getElementById('tableBody').innerHTML += row;
         
         document.getElementById('i_color').value = "";
@@ -224,92 +342,118 @@
         document.getElementById('i_acc').value = "";
         document.getElementById('i_disc').value = "0";
         document.getElementById('i_notes').value = "";
-        document.getElementById('btn-save').disabled = false; 
+
+        checkTableState();
+    }
+
+    function removeRow(btn) {
+        if (isSaved) return;
+        btn.parentElement.parentElement.remove();
+        checkTableState();
+    }
+
+    function checkTableState() {
+        const hasItems = document.querySelectorAll('#tableBody tr').length > 0;
+        document.getElementById('btn-save').disabled = !hasItems || isSaved;
     }
 
     function generatePDF() { 
+        if (!isSaved) { alert("⚠️ يجب حفظ الطلب في قاعدة البيانات أولاً قبل تصدير الـ PDF."); return; }
         updateTimestamp(); 
-        const printArea = document.getElementById('printArea').innerHTML; 
-        const win = window.open('', '_blank', 'width=800,height=600'); 
-        win.document.write(`<html lang="ar" dir="rtl"><head><title>طباعة الطلب</title><style>body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; } .invoice-box { border: 1px solid #ccc; padding: 20px; } h2 { text-align: center; color: #19352d; } .header-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f9f9f9; padding: 10px; margin-bottom: 20px; font-size: 14px; } table { width: 100%; border-collapse: collapse; margin-top: 10px; } th { background: #19352d; color: #fff; padding: 8px; font-size: 12px; border: 1px solid #ccc; } td { padding: 8px; border: 1px solid #ccc; text-align: center; font-size: 12px; } .invoice-footer { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc; font-size: 11px; color: #555; } .invoice-timestamp { font-weight: bold; color: #19352d; font-size: 10px; text-align: left; }</style></head><body><div class="invoice-box">${printArea}</div><script>window.onload = function() { const removeButtons = document.querySelectorAll('button'); removeButtons.forEach(btn => btn.remove()); window.print(); }<\/script></body></html>`); 
+        const printArea = document.getElementById('printArea').cloneNode(true);
+        printArea.querySelectorAll('.no-print').forEach(el => el.remove());
+
+        const win = window.open('', '_blank', 'width=900,height=700'); 
+        win.document.write(`<html><head><title>طباعة</title><style>body{font-family:Tahoma;padding:20px;direction:rtl;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:11px;}th{background:#19352d;color:#fff;}</style></head><body>${printArea.innerHTML}<script>window.onload=()=>window.print();<\/script></body></html>`); 
         win.document.close(); 
     }
 
     function exportPNG() { 
+        if (!isSaved) { alert("⚠️ يجب حفظ الطلب في قاعدة البيانات أولاً قبل تصدير الصورة."); return; }
         updateTimestamp(); 
-        html2canvas(document.getElementById('printArea')).then(c => { 
+        const printArea = document.getElementById('printArea');
+        document.querySelectorAll('.no-print').forEach(el => el.style.visibility = 'hidden');
+
+        html2canvas(printArea).then(c => { 
             let l = document.createElement('a'); 
             l.href = c.toDataURL(); 
             l.download = 'Order_' + document.getElementById('v_ord_in').value + '.png'; 
             l.click(); 
+            document.querySelectorAll('.no-print').forEach(el => el.style.visibility = 'visible');
         }); 
     }
 
-    function refreshOrderID() {
-        const btn = event.target;
-        btn.innerText = "جاري...";
-        btn.disabled = true;
-
-        fetch(SCRIPT_URL + "?action=getmax") 
-        .then(res => res.text())
-        .then(newID => {
-            document.getElementById('v_ord_in').value = newID;
-            document.getElementById('v_ord').innerText = newID; 
-            btn.innerText = "تحديث الرقم";
-            btn.disabled = false;
-        })
-        .catch(() => {
-            btn.innerText = "خطأ!";
-            btn.disabled = false;
-        });
+    function refreshOrderID(event) {
+        if (isSaved) return;
+        fetchOrderID();
     }
 
     function saveToGoogle() {
+        if (isSaved) return;
+        const nameInput = document.getElementById('v_name_in').value.trim();
+        const orderInputVal = document.getElementById('v_ord_in').value.trim();
+
+        if (!nameInput || !orderInputVal || orderInputVal === "جاري التحميل...") {
+            alert("يرجى إدخال اسم العميل ورقم الطلب بشكل صحيح.");
+            return;
+        }
+
         const btn = document.getElementById('btn-save');
         btn.disabled = true;
-        btn.innerText = "جاري الحفظ...";
+        btn.innerText = "⏳ جاري الحفظ...";
 
         const currentTimestamp = updateTimestamp();
-
-        fetch(SCRIPT_URL + "?action=getmax").then(res => res.text()).then(newID => {
-            const orderData = { 
-                order: newID,
-                name: document.getElementById('v_name_in').value, 
-                branch: document.getElementById('v_br_in').value, 
-                coordinator: document.getElementById('v_co_in').value, 
-                type: document.getElementById('v_ty_in').value, 
-                method: document.getElementById('v_me_in').value,
-                maintenance: document.getElementById('v_maint_check').checked ? "نعم" : "لا",
-                termsNotes: document.getElementById('v_footer_in').value, 
-                timestamp: currentTimestamp, 
-                items: [] 
-            };
-            
-            document.querySelectorAll('#tableBody tr').forEach(r => { 
-                orderData.items.push({ 
-                    name: r.cells[0].innerText, 
-                    size: r.cells[1].innerText, 
-                    qty: r.cells[2].innerText, 
-                    gnb: r.cells[3].innerText, 
-                    clor: r.cells[4].innerText, 
-                    hrbq: r.cells[5].innerText, 
-                    side: r.cells[6].innerText,      
-                    discnt: r.cells[7].innerText,    
-                    delivery: r.cells[8].innerText,  
-                    acses: r.cells[9].innerText,     
-                    note: r.cells[10].innerText      
-                }); 
-            });
-
-            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) })
-              .then(() => { 
-                alert("تم الحفظ بنجاح برقم: " + newID);
-                document.getElementById('v_ord_in').value = newID;
-                document.getElementById('btnPDF').disabled = false; 
-                document.getElementById('btnPNG').disabled = false; 
-                btn.innerText = "حفظ في قاعدة البيانات";
-              });
+        const orderData = { 
+            order: orderInputVal,
+            name: nameInput, 
+            branch: document.getElementById('v_br_in').value, 
+            coordinator: document.getElementById('v_co_in').value, 
+            type: document.getElementById('v_ty_in').value, 
+            method: document.getElementById('v_me_in').value,
+            maintenance: document.getElementById('v_maint_check').checked ? "نعم" : "لا",
+            termsNotes: document.getElementById('v_footer_in').value, 
+            timestamp: currentTimestamp, 
+            items: [] 
+        };
+        
+        document.querySelectorAll('#tableBody tr').forEach(r => { 
+            orderData.items.push({ 
+                name: r.cells[0].innerText, 
+                size: r.cells[1].innerText, 
+                qty: r.cells[2].innerText, 
+                gnb: r.cells[3].innerText, 
+                clor: r.cells[4].innerText, 
+                hrbq: r.cells[5].innerText, 
+                side: r.cells[6].innerText,      
+                discnt: r.cells[7].innerText,    
+                delivery: r.cells[8].innerText,  
+                acses: r.cells[9].innerText,     
+                note: r.cells[10].innerText      
+            }); 
         });
+
+        fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) })
+          .then(() => { 
+            isSaved = true;
+            alert("✅ تم الحفظ بنجاح برقم: " + orderInputVal);
+            btn.innerText = "✔️ تم الحفظ بنجاح";
+            document.getElementById('btnPDF').disabled = false;
+            document.getElementById('btnPNG').disabled = false;
+            document.getElementById('btn-refresh-id').disabled = true;
+            document.getElementById('v_ord_in').setAttribute('readonly', true);
+          })
+          .catch(() => {
+            alert("❌ حدث خطأ أثناء الاتصال بالخادم.");
+            btn.innerText = "💾 حفظ في قاعدة البيانات";
+            btn.disabled = false;
+          });
+    }
+
+    function startNewOrder() {
+        if (!isSaved && document.querySelectorAll('#tableBody tr').length > 0) {
+            if (!confirm("⚠️ لم تقم بحفظ الطلب الحالي. هل أنت متأكد من الانتقال لطلب جديد؟")) return;
+        }
+        location.reload();
     }
 </script>
 </body>
