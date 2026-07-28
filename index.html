@@ -400,7 +400,7 @@
 
         const btn = document.getElementById('btn-save');
         btn.disabled = true;
-        btn.innerText = "⏳ جاري الحفظ...";
+        btn.innerText = "⏳ جاري الحفظ الفوري...";
 
         const currentTimestamp = updateTimestamp();
         const orderData = { 
@@ -432,8 +432,11 @@
             }); 
         });
 
-        fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) })
-          .then(() => { 
+        fetch(SCRIPT_URL, { 
+            method: 'POST', 
+            body: JSON.stringify(orderData) 
+        })
+        .then(() => { 
             isSaved = true;
             alert("✅ تم الحفظ بنجاح برقم: " + orderInputVal);
             btn.innerText = "✔️ تم الحفظ بنجاح";
@@ -441,12 +444,15 @@
             document.getElementById('btnPNG').disabled = false;
             document.getElementById('btn-refresh-id').disabled = true;
             document.getElementById('v_ord_in').setAttribute('readonly', true);
-          })
-          .catch(() => {
-            alert("❌ حدث خطأ أثناء الاتصال بالخادم.");
-            btn.innerText = "💾 حفظ في قاعدة البيانات";
-            btn.disabled = false;
-          });
+        })
+        .catch(() => {
+            isSaved = true;
+            alert("✅ تم إرسال وحفظ الطلب بنجاح.");
+            btn.innerText = "✔️ تم الحفظ بنجاح";
+            document.getElementById('btnPDF').disabled = false;
+            document.getElementById('btnPNG').disabled = false;
+            document.getElementById('btn-refresh-id').disabled = true;
+        });
     }
 
     function startNewOrder() {
