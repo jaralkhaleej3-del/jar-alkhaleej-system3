@@ -6,11 +6,50 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#002D62">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' https://script.google.com https://script.googleusercontent.com;">
     <meta charset="UTF-8">
     <title>نظام إدارة الإنتاج - شركة جار الخليج</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- مكتبات فايربيس (Firebase SDKs الإصدار الحديث المتوافق مع الـ Modules) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
+
+        // إعدادات فايربيس الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyBH4FMgOWQOr5XsgzHJojB_l4nI8is42OQ",
+            authDomain: "jaralkhaleej-production.firebaseapp.com",
+            projectId: "jaralkhaleej-production",
+            storageBucket: "jaralkhaleej-production.firebasestorage.app",
+            messagingSenderId: "1083279469158",
+            appId: "1:1083279469158:web:67aa79d28403b4db609ba7",
+            measurementId: "G-NZT603FWK7"
+        };
+
+        // تهيئة فايربيس
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // جعل الدوال متاحة على النطاق العام للاستخدام في الأزرار
+        window.db = db;
+        window.collection = collection;
+        window.getDocs = getDocs;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.serverTimestamp = serverTimestamp;
+
+        // تنفيذ الدوال الأولية بعد تحميل المكتبات
+        window.onload = () => { 
+            fetchOrderID();
+            syncFooter(); 
+            sync();
+        };
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap');
         :root { --primary: #19352d; --accent: #b68d59; --bg: #f0f2f0; }
@@ -229,7 +268,7 @@
         </div>
         
         <div style="display:flex; gap:15px; margin-top:25px;">
-            <button type="button" class="btn-save" id="btn-save" onclick="saveToGoogle()" disabled>💾 حفظ في قاعدة البيانات</button>
+            <button type="button" class="btn-save" id="btn-save" onclick="saveToFirebase()" disabled>💾 حفظ في قاعدة البيانات</button>
             <button type="button" class="btn-export" id="btnPDF" style="background:var(--accent)" onclick="generatePDF()" disabled>📄 تحميل PDF</button>
             <button type="button" class="btn-export" id="btnPNG" style="background:var(--primary)" onclick="exportPNG()" disabled>🖼️ تصدير PNG</button>
         </div>
@@ -238,48 +277,34 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZgabeFNGxNlde8rwmX1iIpnzItKABQUSAoz3_k5igmVVm5FppFeak59zeCaL9819y/exec";
     let isSaved = false;
 
-    window.onload = () => { 
-        fetchOrderID();
-        syncFooter(); 
-        sync();
-    };
-
-    function fetchOrderID() {
+    async function fetchOrderID() {
         const ordInput = document.getElementById('v_ord_in');
         ordInput.value = "جاري التحميل...";
 
-        let safetyTimer = setTimeout(() => {
-            if (ordInput.value === "جاري التحميل...") {
-                ordInput.value = "";
-                ordInput.removeAttribute('readonly');
-                ordInput.placeholder = "أدخل رقم الطلب يدوياً";
-                document.getElementById('v_ord').innerText = "-";
-            }
-        }, 4000);
-
-        fetch(SCRIPT_URL + "?action=getmax")
-            .then(res => res.text())
-            .then(id => {
-                clearTimeout(safetyTimer);
-                if (id && !id.includes("Error") && !id.includes("OK")) {
-                    ordInput.value = id.trim();
-                    document.getElementById('v_ord').innerText = id.trim();
-                } else {
-                    ordInput.value = "";
-                    ordInput.removeAttribute('readonly');
-                    ordInput.placeholder = "أدخل رقم الطلب يدوياً";
+        try {
+            // استعلام سريع وفوري لجلب أحدث رقم طلب من فايربيس
+            const q = window.query(window.collection(window.db, "orders"), window.orderBy("order", "desc"), window.limit(1));
+            const querySnapshot = await window.getDocs(q);
+            
+            let nextId = 1001; // الرقم الابتدائي إذا كانت القاعدة فارغة
+            if (!querySnapshot.empty) {
+                let latestOrder = querySnapshot.docs[0].data();
+                let lastIdNum = parseInt(latestOrder.order);
+                if (!isNaN(lastIdNum)) {
+                    nextId = lastIdNum + 1;
                 }
-                ordInput.setAttribute('readonly', true);
-            })
-            .catch(() => {
-                clearTimeout(safetyTimer);
-                ordInput.value = "";
-                ordInput.removeAttribute('readonly');
-                ordInput.placeholder = "أدخل رقم الطلب يدوياً";
-            });
+            }
+            ordInput.value = nextId;
+            document.getElementById('v_ord').innerText = nextId;
+            ordInput.setAttribute('readonly', true);
+        } catch (error) {
+            console.error("خطأ في جلب رقم الطلب: ", error);
+            ordInput.value = "";
+            ordInput.removeAttribute('readonly');
+            ordInput.placeholder = "أدخل رقم الطلب يدوياً";
+        }
     }
 
     function sync() {
@@ -388,7 +413,7 @@
         fetchOrderID();
     }
 
-    function saveToGoogle() {
+    async function saveToFirebase() {
         if (isSaved) return;
         const nameInput = document.getElementById('v_name_in').value.trim();
         const orderInputVal = document.getElementById('v_ord_in').value.trim();
@@ -413,6 +438,7 @@
             maintenance: document.getElementById('v_maint_check').checked ? "نعم" : "لا",
             termsNotes: document.getElementById('v_footer_in').value, 
             timestamp: currentTimestamp, 
+            createdAt: window.serverTimestamp(),
             items: [] 
         };
         
@@ -432,11 +458,10 @@
             }); 
         });
 
-        fetch(SCRIPT_URL, { 
-            method: 'POST', 
-            body: JSON.stringify(orderData) 
-        })
-        .then(() => { 
+        try {
+            // حفظ البيانات مباشرة في مجموعة "orders" داخل فايربيس
+            await window.setDoc(window.doc(window.db, "orders", orderInputVal), orderData);
+            
             isSaved = true;
             alert("✅ تم الحفظ بنجاح برقم: " + orderInputVal);
             btn.innerText = "✔️ تم الحفظ بنجاح";
@@ -444,15 +469,12 @@
             document.getElementById('btnPNG').disabled = false;
             document.getElementById('btn-refresh-id').disabled = true;
             document.getElementById('v_ord_in').setAttribute('readonly', true);
-        })
-        .catch(() => {
-            isSaved = true;
-            alert("✅ تم إرسال وحفظ الطلب بنجاح.");
-            btn.innerText = "✔️ تم الحفظ بنجاح";
-            document.getElementById('btnPDF').disabled = false;
-            document.getElementById('btnPNG').disabled = false;
-            document.getElementById('btn-refresh-id').disabled = true;
-        });
+        } catch (error) {
+            console.error("خطأ أثناء الحفظ: ", error);
+            alert("❌ حدث خطأ أثناء الحفظ، يرجى التأكد من اتصال الإنترنت.");
+            btn.disabled = false;
+            btn.innerText = "💾 حفظ في قاعدة البيانات";
+        }
     }
 
     function startNewOrder() {
