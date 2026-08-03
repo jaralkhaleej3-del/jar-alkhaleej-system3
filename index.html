@@ -8,48 +8,12 @@
     <meta name="theme-color" content="#002D62">
     <meta charset="UTF-8">
     <title>نظام إدارة الإنتاج - شركة جار الخليج</title>
+    <!-- مكتبات Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- مكتبات التصدير -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <!-- مكتبات فايربيس (Firebase SDKs الإصدار الحديث المتوافق مع الـ Modules) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
-
-        // إعدادات فايربيس الخاصة بك
-        const firebaseConfig = {
-            apiKey: "AIzaSyBH4FMgOWQOr5XsgzHJojB_l4nI8is42OQ",
-            authDomain: "jaralkhaleej-production.firebaseapp.com",
-            projectId: "jaralkhaleej-production",
-            storageBucket: "jaralkhaleej-production.firebasestorage.app",
-            messagingSenderId: "1083279469158",
-            appId: "1:1083279469158:web:67aa79d28403b4db609ba7",
-            measurementId: "G-NZT603FWK7"
-        };
-
-        // تهيئة فايربيس
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // جعل الدوال متاحة على النطاق العام للاستخدام في الأزرار
-        window.db = db;
-        window.collection = collection;
-        window.getDocs = getDocs;
-        window.doc = doc;
-        window.setDoc = setDoc;
-        window.query = query;
-        window.orderBy = orderBy;
-        window.limit = limit;
-        window.serverTimestamp = serverTimestamp;
-
-        // تنفيذ الدوال الأولية بعد تحميل المكتبات
-        window.onload = () => { 
-            fetchOrderID();
-            syncFooter(); 
-            sync();
-        };
-    </script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap');
         :root { --primary: #19352d; --accent: #b68d59; --bg: #f0f2f0; }
@@ -127,7 +91,7 @@
         <h2>بيانات العميل والطلب</h2>
         <div class="form-row">
             <div><label>اسم العميل</label><input type="text" id="v_name_in" oninput="sync()" placeholder="أدخل اسم العميل"></div>
-            <div><label>رقم الطلب</label><input type="text" id="v_ord_in" oninput="sync()" readonly placeholder="جاري التحميل..."></div>
+            <div><label>رقم الطلب</label><input type="text" id="v_ord_in" oninput="sync()" readonly placeholder="جاري جلب الرقم..."></div>
         </div>
         <div class="form-row">
             <div><label>الفرع</label><input type="text" id="v_br_in" oninput="sync()"></div>
@@ -189,10 +153,11 @@
             <div><label>اللون</label><input type="text" id="i_color"></div>
         </div>
         <div class="form-row">
-            <div><label>الطول x العرض</label><input type="text" id="i_size" placeholder="مثال: 120x80"></div>
-            <div><label>الكمية</label><input type="number" id="i_qty" value="1" min="1"></div>
+            <div><label>المقاس</label><input type="text" id="i_size" placeholder="مثال: 120x80"></div>
+            <div><label>اسم الموديل</label><input type="text" id="i_model" placeholder="مثال: رويال / كلاسيك"></div>
         </div>
         <div class="form-row">
+            <div><label>الكمية</label><input type="number" id="i_qty" value="1" min="1"></div>
             <div>
                 <label>نوع الجوانب</label>
                 <select id="i_side">
@@ -203,9 +168,9 @@
                     <option value="ـــ">ـــ</option>
                 </select>
             </div>
-            <div><label>الهرابات</label><input type="number" id="i_drain" value="1" min="0"></div>
         </div>
         <div class="form-row">
+            <div><label>الهرابات</label><input type="number" id="i_drain" value="1" min="0"></div>
             <div>
                 <label>اتجاه الهراب</label>
                 <select id="i_drain_dir">
@@ -216,11 +181,14 @@
                     <option>ــــ</option>
                 </select>
             </div>
-            <div><label>الاكسسوارات</label><input type="text" id="i_acc"></div>
         </div>
         <div class="form-row">
+            <div><label>الاكسسوارات</label><input type="text" id="i_acc"></div>
             <div><label>موعد التسليم</label><input type="date" id="i_del"></div>
+        </div>
+        <div class="form-row">
             <div><label>نسبة الخصم %</label><input type="number" id="i_disc" value="0" min="0" max="100"></div>
+            <div></div>
         </div>
         <div class="form-group" style="margin-bottom:15px;">
             <label>الملاحظات الفنية</label>
@@ -245,7 +213,7 @@
                 <thead>
                     <tr>
                         <th>الصنف</th>
-                        <th>المقاس</th>
+                        <th>المقاس والموديل</th>
                         <th>كمية</th>
                         <th>جوانب</th>
                         <th>اللون</th>
@@ -269,42 +237,60 @@
         
         <div style="display:flex; gap:15px; margin-top:25px;">
             <button type="button" class="btn-save" id="btn-save" onclick="saveToFirebase()" disabled>💾 حفظ في قاعدة البيانات</button>
-            <button type="button" class="btn-export" id="btnPDF" style="background:var(--accent)" onclick="generatePDF()" disabled>📄 تحميل PDF</button>
-            <button type="button" class="btn-export" id="btnPNG" style="background:var(--primary)" onclick="exportPNG()" disabled>🖼️ تصدير PNG</button>
+            <button type="button" class="btn-export" id="btnPDF" style="background:var(--accent)" onclick="handlePDFExport()" disabled>📄 تحميل PDF</button>
+            <button type="button" class="btn-export" id="btnPNG" style="background:var(--primary)" onclick="handlePNGExport()" disabled>🖼️ تصدير PNG</button>
         </div>
         <button type="button" class="btn-new" onclick="startNewOrder()">➕ طلب جديد / إعادة تنشيط</button>
     </div>
 </div>
 
 <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDummyKeyForJarAlKhaleej",
+        authDomain: "jaralkhaleej-production.firebaseapp.com",
+        projectId: "jaralkhaleej-production",
+        storageBucket: "jaralkhaleej-production.appspot.com",
+        messagingSenderId: "00000000000",
+        appId: "1:000000000:web:00000000000"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
     let isSaved = false;
 
-    async function fetchOrderID() {
-        const ordInput = document.getElementById('v_ord_in');
-        ordInput.value = "جاري التحميل...";
+    window.onload = () => { 
+        fetchMaxOrderPlusOne();
+        syncFooter(); 
+        sync();
+    };
 
-        try {
-            // استعلام سريع وفوري لجلب أحدث رقم طلب من فايربيس
-            const q = window.query(window.collection(window.db, "orders"), window.orderBy("order", "desc"), window.limit(1));
-            const querySnapshot = await window.getDocs(q);
-            
-            let nextId = 1001; // الرقم الابتدائي إذا كانت القاعدة فارغة
-            if (!querySnapshot.empty) {
-                let latestOrder = querySnapshot.docs[0].data();
-                let lastIdNum = parseInt(latestOrder.order);
-                if (!isNaN(lastIdNum)) {
-                    nextId = lastIdNum + 1;
+    // جلب جميع المستندات ومعالجة الأرقام برمجياً لضمان دقة استخراج أكبر رقم مهما كانت طريقة تخزينه في القاعدة
+    function fetchMaxOrderPlusOne() {
+        const ordInput = document.getElementById('v_ord_in');
+        ordInput.value = "جاري الفحص...";
+
+        db.collection("orders").get().then((querySnapshot) => {
+            let maxVal = 0;
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                // فحص الحقول المحتملة لرقم الطلب وتحويلها إلى رقم صحيح
+                let val = parseInt(data.orderNumber || data.order || doc.id || 0);
+                if (!isNaN(val) && val > maxVal) {
+                    maxVal = val;
                 }
-            }
+            });
+
+            let nextId = maxVal + 1;
             ordInput.value = nextId;
             document.getElementById('v_ord').innerText = nextId;
             ordInput.setAttribute('readonly', true);
-        } catch (error) {
-            console.error("خطأ في جلب رقم الطلب: ", error);
-            ordInput.value = "";
-            ordInput.removeAttribute('readonly');
-            ordInput.placeholder = "أدخل رقم الطلب يدوياً";
-        }
+        }).catch((error) => {
+            console.error("Error fetching max order: ", error);
+            ordInput.value = "خطأ في الاتصال";
+        });
     }
 
     function sync() {
@@ -338,14 +324,18 @@
         }
 
         const size = document.getElementById('i_size').value.trim();
+        const model = document.getElementById('i_model').value.trim();
+        
         if (!size) {
             alert("يرجى إدخال المقاس قبل الإضافة.");
             return;
         }
 
+        const sizeAndModel = model ? `${size} - ${model}` : size;
+
         let row = `<tr>
             <td>${document.getElementById('i_name').value}</td> 
-            <td>${size}</td>          
+            <td>${sizeAndModel}</td>          
             <td>${document.getElementById('i_qty').value}</td>          
             <td>${document.getElementById('i_side').value}</td>
             <td>${document.getElementById('i_color').value || 'افتراضي'}</td>
@@ -362,6 +352,7 @@
         
         document.getElementById('i_color').value = "";
         document.getElementById('i_size').value = "";
+        document.getElementById('i_model').value = "";
         document.getElementById('i_qty').value = "1";
         document.getElementById('i_drain').value = "1";
         document.getElementById('i_acc').value = "";
@@ -382,8 +373,17 @@
         document.getElementById('btn-save').disabled = !hasItems || isSaved;
     }
 
-    function generatePDF() { 
+    function handlePDFExport() {
         if (!isSaved) { alert("⚠️ يجب حفظ الطلب في قاعدة البيانات أولاً قبل تصدير الـ PDF."); return; }
+        generatePDF();
+    }
+
+    function handlePNGExport() {
+        if (!isSaved) { alert("⚠️ يجب حفظ الطلب في قاعدة البيانات أولاً قبل تصدير الصورة."); return; }
+        exportPNG();
+    }
+
+    function generatePDF() { 
         updateTimestamp(); 
         const printArea = document.getElementById('printArea').cloneNode(true);
         printArea.querySelectorAll('.no-print').forEach(el => el.remove());
@@ -394,7 +394,6 @@
     }
 
     function exportPNG() { 
-        if (!isSaved) { alert("⚠️ يجب حفظ الطلب في قاعدة البيانات أولاً قبل تصدير الصورة."); return; }
         updateTimestamp(); 
         const printArea = document.getElementById('printArea');
         document.querySelectorAll('.no-print').forEach(el => el.style.visibility = 'hidden');
@@ -410,71 +409,83 @@
 
     function refreshOrderID(event) {
         if (isSaved) return;
-        fetchOrderID();
+        fetchMaxOrderPlusOne();
     }
 
-    async function saveToFirebase() {
+    function saveToFirebase() {
         if (isSaved) return;
         const nameInput = document.getElementById('v_name_in').value.trim();
-        const orderInputVal = document.getElementById('v_ord_in').value.trim();
 
-        if (!nameInput || !orderInputVal || orderInputVal === "جاري التحميل...") {
-            alert("يرجى إدخال اسم العميل ورقم الطلب بشكل صحيح.");
+        if (!nameInput) {
+            alert("يرجى إدخال اسم العميل بشكل صحيح.");
             return;
         }
 
         const btn = document.getElementById('btn-save');
         btn.disabled = true;
-        btn.innerText = "⏳ جاري الحفظ الفوري...";
+        btn.innerText = "⏳ جاري حساب أكبر رقم والحفظ...";
 
-        const currentTimestamp = updateTimestamp();
-        const orderData = { 
-            order: orderInputVal,
-            name: nameInput, 
-            branch: document.getElementById('v_br_in').value, 
-            coordinator: document.getElementById('v_co_in').value, 
-            type: document.getElementById('v_ty_in').value, 
-            method: document.getElementById('v_me_in').value,
-            maintenance: document.getElementById('v_maint_check').checked ? "نعم" : "لا",
-            termsNotes: document.getElementById('v_footer_in').value, 
-            timestamp: currentTimestamp, 
-            createdAt: window.serverTimestamp(),
-            items: [] 
-        };
-        
-        document.querySelectorAll('#tableBody tr').forEach(r => { 
-            orderData.items.push({ 
-                name: r.cells[0].innerText, 
-                size: r.cells[1].innerText, 
-                qty: r.cells[2].innerText, 
-                gnb: r.cells[3].innerText, 
-                clor: r.cells[4].innerText, 
-                hrbq: r.cells[5].innerText, 
-                side: r.cells[6].innerText,      
-                discnt: r.cells[7].innerText,    
-                delivery: r.cells[8].innerText,  
-                acses: r.cells[9].innerText,     
-                note: r.cells[10].innerText      
-            }); 
-        });
+        db.collection("orders").get().then((querySnapshot) => {
+            let maxVal = 0;
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                let val = parseInt(data.orderNumber || data.order || doc.id || 0);
+                if (!isNaN(val) && val > maxVal) {
+                    maxVal = val;
+                }
+            });
 
-        try {
-            // حفظ البيانات مباشرة في مجموعة "orders" داخل فايربيس
-            await window.setDoc(window.doc(window.db, "orders", orderInputVal), orderData);
+            let nextOrderNum = maxVal + 1;
+            const currentTimestamp = updateTimestamp();
             
-            isSaved = true;
-            alert("✅ تم الحفظ بنجاح برقم: " + orderInputVal);
-            btn.innerText = "✔️ تم الحفظ بنجاح";
-            document.getElementById('btnPDF').disabled = false;
-            document.getElementById('btnPNG').disabled = false;
-            document.getElementById('btn-refresh-id').disabled = true;
-            document.getElementById('v_ord_in').setAttribute('readonly', true);
-        } catch (error) {
-            console.error("خطأ أثناء الحفظ: ", error);
-            alert("❌ حدث خطأ أثناء الحفظ، يرجى التأكد من اتصال الإنترنت.");
+            const orderData = { 
+                orderNumber: String(nextOrderNum),
+                order: String(nextOrderNum),
+                name: nameInput, 
+                branch: document.getElementById('v_br_in').value, 
+                coordinator: document.getElementById('v_co_in').value, 
+                type: document.getElementById('v_ty_in').value, 
+                method: document.getElementById('v_me_in').value,
+                maintenance: document.getElementById('v_maint_check').checked ? "نعم" : "لا",
+                termsNotes: document.getElementById('v_footer_in').value, 
+                timestamp: currentTimestamp,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                items: [] 
+            };
+            
+            document.querySelectorAll('#tableBody tr').forEach(r => { 
+                orderData.items.push({ 
+                    name: r.cells[0].innerText, 
+                    size: r.cells[1].innerText, 
+                    qty: r.cells[2].innerText, 
+                    gnb: r.cells[3].innerText, 
+                    clor: r.cells[4].innerText, 
+                    hrbq: r.cells[5].innerText, 
+                    side: r.cells[6].innerText,      
+                    discnt: r.cells[7].innerText,    
+                    delivery: r.cells[8].innerText,  
+                    acses: r.cells[9].innerText,     
+                    note: r.cells[10].innerText      
+                }); 
+            });
+
+            return db.collection("orders").doc(String(nextOrderNum)).set(orderData).then(() => {
+                document.getElementById('v_ord_in').value = nextOrderNum;
+                document.getElementById('v_ord').innerText = nextOrderNum;
+                isSaved = true;
+                alert("✅ تم الحفظ بنجاح برقم الطلب: " + nextOrderNum);
+                btn.innerText = "✔️ تم الحفظ بنجاح";
+                document.getElementById('btnPDF').disabled = false;
+                document.getElementById('btnPNG').disabled = false;
+                document.getElementById('btn-refresh-id').disabled = true;
+                document.getElementById('v_ord_in').setAttribute('readonly', true);
+            });
+        }).catch((error) => {
+            console.error("Error saving order: ", error);
+            alert("❌ حدث خطأ أثناء الحفظ، يرجى المحاولة مرة أخرى.");
             btn.disabled = false;
             btn.innerText = "💾 حفظ في قاعدة البيانات";
-        }
+        });
     }
 
     function startNewOrder() {
